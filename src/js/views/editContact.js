@@ -1,8 +1,9 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { Context } from "../store/appContext";
+import PropTypes from "prop-types";
 
-export const AddContact = () => {
+export const EditContact = props => {
 	const { store, actions } = useContext(Context);
 	async function handleSubmit(event) {
 		event.preventDefault();
@@ -12,10 +13,11 @@ export const AddContact = () => {
 			full_name: fullName,
 			email: email,
 			phone: phone,
-			address: address
+			address: address,
+			id: props.match.params.contactId
 		};
 		console.log(`this is the object ${newContactData}`);
-		let success = await actions.createContact(newContactData);
+		let success = await actions.editContact(newContactData);
 		if (success) {
 			history.push("/");
 		} else {
@@ -27,10 +29,22 @@ export const AddContact = () => {
 	const [phone, setPhone] = useState("");
 	const [address, setAddress] = useState("");
 	var history = useHistory();
+	useEffect(() => {
+		console.log("running effect");
+		for (let contact of store.contacts) {
+			if (contact.id == props.match.params.contactId) {
+				console.log(contact.id);
+				setFullName(contact.full_name);
+				setEmail(contact.email);
+				setPhone(contact.phone);
+				setAddress(contact.address);
+			}
+		}
+	}, [store.contacts]);
 	return (
 		<div className="container">
 			<div>
-				<h1 className="text-center mt-5">Add a new contact</h1>
+				<h1 className="text-center mt-5">Edit contact</h1>
 				<form onSubmit={handleSubmit}>
 					<div className="form-group">
 						<label>Full Name</label>
@@ -82,4 +96,7 @@ export const AddContact = () => {
 			</div>
 		</div>
 	);
+};
+EditContact.propTypes = {
+	match: PropTypes.object
 };
